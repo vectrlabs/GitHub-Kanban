@@ -1,12 +1,8 @@
-// TODO: Create a settings page
-var config = {
-  token: '',
-  user: '',
-  repo: ''
-};
+// the options of this extention injected by content.js.
+var config = injectedConfig;
 
 // Only run if we are in the right :username:/:repo:
-if( window.location.pathname.indexOf( config.user + '/' + config.repo ) !== -1 ) {
+if((config.username && config.repo) && window.location.pathname.indexOf( config.username + '/' + config.repo ) !== -1 ) {
 
   var $firstButton = $('.repository-sidebar .sunken-menu-group li:first');
   var $boardButton = $firstButton.clone();
@@ -178,7 +174,7 @@ if( window.location.pathname.indexOf( config.user + '/' + config.repo ) !== -1 )
       auth: 'oauth'
     });
 
-    var repo = github.getRepo(config.user, config.repo);
+    var repo = github.getRepo(config.username, config.repo);
     var closeMessageRegex   = /((?:[Cc]los(?:e[sd]?|ing)|[Ff]ix(?:e[sd]|ing)?|[Rr]esolv(?:e[sd]?|ing)) +(?:(?:issues? +)?#\d+(?:(?:, *| +and +)?))+)/g;
     var pullRequestedIssues = [];
 
@@ -204,8 +200,8 @@ if( window.location.pathname.indexOf( config.user + '/' + config.repo ) !== -1 )
     });
 
     // TODO: Don't Hardcode Milestone in opts
-    var opts      = { user: config.user, repo: config.repo, milestone: 1, state: 'all' };
-    var issues    = github.getIssues(config.user, config.repo);
+    var opts      = { user: config.username, repo: config.repo, milestone: 1, state: 'all' };
+    var issues    = github.getIssues(config.username, config.repo);
     var colCount  = [0,0,0,0];
 
     // Sort issues into kanban columns
