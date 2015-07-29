@@ -20,10 +20,10 @@ A Chrome extension which injects a fully automated Kanban board into GitHub, hac
 
 Config:
 
-```
+```javascript
 var config = {
   token: 'YOUR_GITHUB_TOKEN',
-  user: 'GITHUB_USERNAME',
-  repo: 'REPO_NAME'
+  user: 'GITHUB_USERNAME', // 'vectrlabs'
+  repo: 'REPO_NAME' // 'vectr'
 };
 ```
