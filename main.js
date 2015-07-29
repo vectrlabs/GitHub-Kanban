@@ -76,6 +76,8 @@ if( window.location.pathname.indexOf( config.user + '/' + config.repo ) !== -1 )
     var avatar = (!!issue.assignee) ? issue.assignee.avatar_url : '';
     var labels = '';
 
+    console.log('issue', issue)
+
     issue.labels.forEach(function(label) {
       if( label.name !== 'in progress' ) {
         labels += ' <span style="background:#' + label.color + '" class="label">' + label.name + '</span>';
@@ -90,7 +92,7 @@ if( window.location.pathname.indexOf( config.user + '/' + config.repo ) !== -1 )
           '<h6>#' + issue.number + '</h6>',
         '</div>',
         '<div class="gitban_tags">' + labels + '</div>',
-        '<span class="gitban_link"><a href="' + issue.html_link + '" target="_blank"></a></span>',
+        '<span class="gitban_link"><a href="' + issue.html_url + '" target="_blank"></a></span>',
       '</div>'
     ].join(''));
   }
