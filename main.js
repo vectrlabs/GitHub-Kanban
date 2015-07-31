@@ -111,6 +111,7 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
     var $container = $('.container');
 
     $container.removeClass('show_gitban');
+    $('.gitban_button').find('a').removeClass('selected');
     $('.repo-container').addClass('with-full-navigation');
     $('.repository-content').show();
   }
@@ -298,6 +299,9 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
 
   }
 
+  // Previously opened button
+  var $prevButton = $();
+
   /**
    * Show/Hide the kanban board when pressing the kanban board button
    *
@@ -311,9 +315,15 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
 
     // Restore default behaviour
     if( $container.hasClass('show_gitban') ) {
+      $prevButton.find('a').addClass('selected');
       closeGitban();
       return;
     }
+
+    $prevButton = $('.repository-sidebar li a.selected').parent();
+
+    $prevButton.find('a').removeClass('selected');
+    $(this).find('a').addClass('selected');
 
     loadGitHubIssues();
 
