@@ -11,12 +11,25 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
   var $codeReviewIssues = $();
   var $closedIssues     = $();
   var $board = $('<div class="gitban_board gitban_board_loading" />');
+
+  var $milestone = $([
+    '<div class="gitban_milestone">',
+      '<h4 class="gitban_milestone_name"><a href="https://github.com/' + config.username + '/' + config.repo + '/milestones" target="_blank">Milestone</a></h4>',
+      '<h5 class="milestone-meta">',
+        '<span class="milestone-meta-item"></span>',
+      '</h5>',
+    '</div>'
+  ].join(''));
+
   var $loader = $([
     '<div class="context-loader large-format-loader is-context-loading">',
       '<p><img height="64" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-128.gif" /></p>',
       '<p>Loading...</p>',
     '</div>'
   ].join(''));
+
+  // Append the milestone
+  $milestone.prependTo( $board );
 
   // Label the button
   $boardButton.addClass('gitban_button')
@@ -175,77 +188,113 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
     });
 
     var repo = github.getRepo(config.username, config.repo);
-    var closeMessageRegex   = /((?:[Cc]los(?:e[sd]?|ing)|[Ff]ix(?:e[sd]|ing)?|[Rr]esolv(?:e[sd]?|ing)) +(?:(?:issues? +)?#\d+(?:(?:, *| +and +)?))+)/g;
-    var pullRequestedIssues = [];
+    var milestone;
 
-    // Get the issue #'s referenced in open pull requests
-    repo.listPulls('open', function(err, pullRequests) {
+    repo.listMilestones(function(err, milestones) {
       if( err ) {
         return;
       }
 
-      pullRequests.forEach(function(pr) {
-        var matches = pr.title.match( closeMessageRegex );
-
-        if( !matches ) return;
-
-        matches.forEach(function(issueNum) {
-          issueNum = Number( issueNum.replace(/\D/g,'') );
-
-          if( pullRequestedIssues.indexOf(issueNum) === -1 ) {
-            pullRequestedIssues.push( issueNum );
-          }
-        });
-      });
-    });
-
-    // TODO: Don't Hardcode Milestone in opts
-    var opts      = { user: config.username, repo: config.repo, milestone: 1, state: 'all' };
-    var issues    = github.getIssues(config.username, config.repo);
-    var colCount  = [0,0,0,0];
-
-    // Sort issues into kanban columns
-    issues.list(opts, function(err, issues) {
-      if( err ) {
-        return;
-      }
-
-      issues.forEach(function(issue) {
-        var $i = $issueMarkup( issue );
-
-        // The issue is closed
-        if( issue.state === 'closed' ) {
-          $closedIssues.find('.gitban_issues_container').append( $i );
-          colCount[3]++;
-
-        // There's an open pull request referencing this issue
-        } else if( pullRequestedIssues.indexOf( issue.number ) !== -1 ) {
-          $codeReviewIssues.find('.gitban_issues_container').append( $i );
-          colCount[2]++;
-
-        // Alternative for in progress column: the issue has been assigned
-        // } else if( !!issue.assignee ) {
-
-        // TODO: Don't hardcode "in progress" ?
-        } else if( issue.labels.map(function(l) { return l.name; }).indexOf('in progress') !== -1 ) {
-          $inProgressIssues.find('.gitban_issues_container').append( $i );
-          colCount[1]++;
-
-        // Otherwise it's open
-        } else {
-          $openIssues.find('.gitban_issues_container').append( $i );
-          colCount[0]++;
+      milestones.forEach(function(ms) {
+        if( !milestone || new Date(ms.due_on) < new Date(milestone.due_on) ) {
+          milestone = ms;
         }
       });
 
-      // Set 'total's for each column
-      var $count = $('.gitban_count');
-      colCount.forEach(function(num, i) {
-        $count.eq(i).text( num );
+      // Set the title
+      $milestone.find('.gitban_milestone_name a')
+        .text( 'Working On: ' + milestone.title );
+
+      // Get time left
+      var dayDiff   = Math.floor( (new Date( milestone.due_on ) - new Date()) / 86400000 );
+      var timeLeft  = ( dayDiff <= 7 ) ? dayDiff + ' days' : Math.floor(dayDiff / 7) + ' weeks';
+
+      // Set the open / closed
+      $milestone.find('.milestone-meta-item')
+        .html( '<span class="octicon octicon-calendar"></span>' + ' Due in ' + timeLeft )
+
+      // Set open/closed issues
+      $milestone.find('.gitban_milestone_description p')
+        .html( milestone.description );
+
+      getIssues();
+    });
+
+    /**
+     * Once we have our milestone load our issues.
+     */
+    function getIssues() {
+      var closeMessageRegex   = /((?:[Cc]los(?:e[sd]?|ing)|[Ff]ix(?:e[sd]|ing)?|[Rr]esolv(?:e[sd]?|ing)) +(?:(?:issues? +)?#\d+(?:(?:, *| +and +)?))+)/g;
+      var pullRequestedIssues = [];
+
+      // Get the issue #'s referenced in open pull requests
+      repo.listPulls('open', function(err, pullRequests) {
+        if( err ) {
+          return;
+        }
+
+        pullRequests.forEach(function(pr) {
+          var matches = pr.title.match( closeMessageRegex );
+
+          if( !matches ) return;
+
+          matches.forEach(function(issueNum) {
+            issueNum = Number( issueNum.replace(/\D/g,'') );
+
+            if( pullRequestedIssues.indexOf(issueNum) === -1 ) {
+              pullRequestedIssues.push( issueNum );
+            }
+          });
+        });
       });
 
-      $loader.hide();
-    });
+      var opts      = { user: config.username, repo: config.repo, milestone: milestone.number, state: 'all' };
+      var issues    = github.getIssues(config.username, config.repo);
+      var colCount  = [0,0,0,0];
+
+      // Sort issues into kanban columns
+      issues.list(opts, function(err, issues) {
+        if( err ) {
+          return;
+        }
+
+        issues.forEach(function(issue) {
+          var $i = $issueMarkup( issue );
+
+          // The issue is closed
+          if( issue.state === 'closed' ) {
+            $closedIssues.find('.gitban_issues_container').append( $i );
+            colCount[3]++;
+
+          // There's an open pull request referencing this issue
+          } else if( pullRequestedIssues.indexOf( issue.number ) !== -1 ) {
+            $codeReviewIssues.find('.gitban_issues_container').append( $i );
+            colCount[2]++;
+
+          // Alternative for in progress column: the issue has been assigned
+          // } else if( !!issue.assignee ) {
+
+          // TODO: Don't hardcode "in progress" ?
+          } else if( issue.labels.map(function(l) { return l.name; }).indexOf('in progress') !== -1 ) {
+            $inProgressIssues.find('.gitban_issues_container').append( $i );
+            colCount[1]++;
+
+          // Otherwise it's open
+          } else {
+            $openIssues.find('.gitban_issues_container').append( $i );
+            colCount[0]++;
+          }
+        });
+
+        // Set 'total's for each column
+        var $count = $('.gitban_count');
+        colCount.forEach(function(num, i) {
+          $count.eq(i).text( num );
+        });
+
+        $loader.hide();
+      });
+    }
 
   }
 
