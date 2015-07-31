@@ -12,7 +12,7 @@
 
 (function() {
   'use strict';
-  
+
   // Initial Setup
   // -------------
 
@@ -23,10 +23,10 @@
       if (typeof btoa === 'undefined') {
         btoa = require('btoa'); //jshint ignore:line
       }
-  } else { 
+  } else {
       btoa = window.btoa;
   }
-  
+
   //prefer native XMLHttpRequest always
   /* istanbul ignore if  */
   if (typeof window !== 'undefined' && typeof window.XMLHttpRequest !== 'undefined'){
@@ -106,7 +106,7 @@
 
           var links = (xhr.getResponseHeader('link') || '').split(/\s*,\s*/g),
               next = null;
-          links.forEach(function(link) { 
+          links.forEach(function(link) {
             next = /rel="next"/.test(link) ? link : next;
           });
 
@@ -259,7 +259,7 @@
         if (branch === currentTree.branch && currentTree.sha) {
           return cb(null, currentTree.sha);
         }
-        
+
         that.getRef('heads/' + branch, function(err, sha) {
           currentTree.branch = branch;
           currentTree.sha = sha;
@@ -275,7 +275,7 @@
           if (err) {
             return cb(err);
           }
-          
+
           cb(null, res.object.sha);
         });
       };
@@ -316,6 +316,19 @@
         _request('DELETE', repoPath, options, cb);
       };
 
+      // List all milestones of a repository
+      // -------
+
+      this.listMilestones = function(cb) {
+        _request('GET', repoPath + '/milestones', null, function(err, milestones) {
+          if (err) {
+            return cb(err);
+          }
+
+          cb(null, milestones);
+        });
+      };
+
       // List all tags of a repository
       // -------
 
@@ -324,7 +337,7 @@
           if (err) {
             return cb(err);
           }
-          
+
           cb(null, tags);
         });
       };
@@ -366,7 +379,7 @@
         _request("GET", repoPath + "/git/refs/heads", null, function(err, heads) {
           if (err) return cb(err);
           cb(null, heads.map(function(head) {
-              var headParts = head.ref.split('/'); 
+              var headParts = head.ref.split('/');
               return headParts[headParts.length - 1];
           }));
         });
