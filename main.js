@@ -227,6 +227,7 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
     function getIssues() {
       var closeMessageRegex   = /((?:[Cc]los(?:e[sd]?|ing)|[Ff]ix(?:e[sd]|ing)?|[Rr]esolv(?:e[sd]?|ing)) +(?:(?:issues? +)?#\d+(?:(?:, *| +and +)?))+)/g;
       var pullRequestedIssues = [];
+      var prLinks = {};
 
       // Get the issue #'s referenced in open pull requests
       repo.listPulls('open', function(err, pullRequests) {
@@ -244,6 +245,7 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
 
             if( pullRequestedIssues.indexOf(issueNum) === -1 ) {
               pullRequestedIssues.push( issueNum );
+              prLinks[issueNum] = pr.html_url;
             }
           });
         });
@@ -269,6 +271,8 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
 
           // There's an open pull request referencing this issue
           } else if( pullRequestedIssues.indexOf( issue.number ) !== -1 ) {
+            // Replace with PR link
+            $i.find('.gitban_link a').attr('href', prLinks[issue.number] );
             $codeReviewIssues.find('.gitban_issues_container').append( $i );
             colCount[2]++;
 
