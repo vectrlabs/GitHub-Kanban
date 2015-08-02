@@ -16,14 +16,4 @@ A Chrome extension which injects a fully automated Kanban board into GitHub, hac
 * Go to [chrome://extensions/](chrome://extensions/) to manage your extensions
 * Check the `developer mode` box at the top of this page
 * `Load upacked extension` - point this to where you cloned the repo
-* Edit the config in `/main.js`
-
-Config:
-
-```javascript
-var config = {
-  token: 'YOUR_GITHUB_TOKEN',
-  user: 'GITHUB_USERNAME', // 'vectrlabs'
-  repo: 'REPO_NAME' // 'vectr'
-};
-```
+* Visit the extension's options page to fill our the username (vectrlabs), the repo (vectr), and your personal access token
