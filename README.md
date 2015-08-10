@@ -2,7 +2,7 @@
 
 A Chrome extension which injects a fully automated Kanban board into GitHub, hacked together very quickly. 
 
-![Kanban Board](https://cldup.com/ER89tfJKTN-1200x1200.png)
+![Kanban Board](https://cldup.com/3ttja2zfJZ-2000x2000.png)
 
 # Usage
 
