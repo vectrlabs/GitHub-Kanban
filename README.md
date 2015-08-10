@@ -1,13 +1,13 @@
 # What
 
-A Chrome extension which injects a fully automated Kanban board into GitHub, hacked together very quickly. 
+A Chrome extension which injects a fully automated Kanban board into GitHub, hacked together very quickly.
 
-![Kanban Board](https://cldup.com/ER89tfJKTN-1200x1200.png)
+![Kanban Board](https://cldup.com/3ttja2zfJZ-2000x2000.png)
 
 # Usage
 
 * Mark your issues with the `in progress` tag when you begin work on them.
-* Always [close issues with a commit message](https://help.github.com/articles/closing-issues-via-commit-messages/) (fix #123, etc...). These messages are used to move issues to the Testing / Code Review column. 
+* Always [close issues with a commit message](https://help.github.com/articles/closing-issues-via-commit-messages/) (fix #123, etc...). These messages are used to move issues to the Testing / Code Review column.
 * That's it - everything else will happen automatically.
 
 # Installation
