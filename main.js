@@ -117,6 +117,7 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
   function closeGitban() {
     var $container = $('.repo-container').closest('.container');
 
+    $board.hide();
     $container.removeClass('show_gitban');
     $('.gitban_button').find('a').removeClass('selected');
     $('.repo-container').addClass('with-full-navigation');
