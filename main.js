@@ -52,7 +52,7 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
 
   // Insert empty kanban board
   $board.append( $loader )
-    .appendTo('.repository-with-sidebar');
+    .appendTo('.repo-container');
 
   /**
    * Markup for issue columns. Icons are octicons.
@@ -108,7 +108,7 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
    * Close the Kanban board, restore normal github.
    */
   function closeGitban() {
-    var $container = $('.container');
+    var $container = $('.repo-container').closest('.container');
 
     $container.removeClass('show_gitban');
     $('.gitban_button').find('a').removeClass('selected');
@@ -315,15 +315,16 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
     e.preventDefault();
     e.stopPropagation();
 
-    var $container = $('.container');
+    var $container = $('.repo-container').closest('.container');
 
-    // Restore default behaviour
+    // Close the container....
     if( $container.hasClass('show_gitban') ) {
       $prevButton.find('a').addClass('selected');
       closeGitban();
       return;
     }
 
+    $container.addClass('show_gitban');
     $prevButton = $('.repository-sidebar li a.selected').parent();
 
     $prevButton.find('a').removeClass('selected');
@@ -335,6 +336,7 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
     $('.repo-container').removeClass('with-full-navigation');
     $('.repository-content').hide();
 
+    $board.show();
   });
 
 }

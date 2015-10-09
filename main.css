@@ -9,6 +9,7 @@
   top: 0;
   height: 850px;
   display: none;
+  padding: 5px 10px;
 }
 
 .gitban_milestone {
@@ -38,6 +39,16 @@
 .site > .container.show_gitban {
   position: relative;
   min-height: 850px;
+}
+
+.show_gitban {
+  width: 100% !important;
+  padding: 0 5px !important;
+}
+
+.show_gitban .repo-container {
+  position: relative;
+  height: 850px;
 }
 
 .site > .container.show_gitban .repository_content {
