@@ -8,7 +8,6 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
   var $boardButton = $firstButton.clone();
   var $openIssues  = $();
   var $inProgressIssues = $();
-  var $codeReviewIssues = $();
   var $closedIssues     = $();
   var $board = $('<div class="gitban_board gitban_board_loading" />');
 
@@ -159,18 +158,6 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
       emptyKanbanCol( $inProgressIssues );
     }
 
-    if( !$codeReviewIssues.length ) {
-      $codeReviewIssues = $issuesColMarkup({
-        className: 'code_review',
-        stage: 'Testing & Code Review',
-        icon: 'comment-discussion'
-      });
-
-      $codeReviewIssues.appendTo( $board );
-    } else {
-      emptyKanbanCol( $codeReviewIssues );
-    }
-
     if( !$closedIssues.length ) {
       $closedIssues = $issuesColMarkup({
         className: 'closed',
@@ -226,34 +213,10 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
      */
     function getIssues() {
       var closeMessageRegex   = /((?:[Cc]los(?:e[sd]?|ing)|[Ff]ix(?:e[sd]|ing)?|[Rr]esolv(?:e[sd]?|ing)) +(?:(?:issues? +)?#\d+(?:(?:, *| +and +)?))+)/g;
-      var pullRequestedIssues = [];
-      var prLinks = {};
-
-      // Get the issue #'s referenced in open pull requests
-      repo.listPulls('open', function(err, pullRequests) {
-        if( err ) {
-          return;
-        }
-
-        pullRequests.forEach(function(pr) {
-          var matches = pr.title.match( closeMessageRegex );
-
-          if( !matches ) return;
-
-          matches.forEach(function(issueNum) {
-            issueNum = Number( issueNum.replace(/\D/g,'') );
-
-            if( pullRequestedIssues.indexOf(issueNum) === -1 ) {
-              pullRequestedIssues.push( issueNum );
-              prLinks[issueNum] = pr.html_url;
-            }
-          });
-        });
-      });
 
       var opts      = { user: config.username, repo: config.repo, milestone: milestone.number, state: 'all' };
       var issues    = github.getIssues(config.username, config.repo);
-      var colCount  = [0,0,0,0];
+      var colCount  = [0,0,0];
 
       // Sort issues into kanban columns
       issues.list(opts, function(err, issues) {
@@ -268,16 +231,6 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
           if( issue.state === 'closed' ) {
             $closedIssues.find('.gitban_issues_container').append( $i );
             colCount[3]++;
-
-          // There's an open pull request referencing this issue
-          } else if( pullRequestedIssues.indexOf( issue.number ) !== -1 ) {
-            // Replace with PR link
-            $i.find('.gitban_link a').attr('href', prLinks[issue.number] );
-            $codeReviewIssues.find('.gitban_issues_container').append( $i );
-            colCount[2]++;
-
-          // Alternative for in progress column: the issue has been assigned
-          // } else if( !!issue.assignee ) {
 
           // TODO: Don't hardcode "in progress" ?
           } else if( issue.labels.map(function(l) { return l.name; }).indexOf('in progress') !== -1 ) {
