@@ -20,6 +20,14 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
     '</div>'
   ].join(''));
 
+  var $progress = $([
+    '<div class="gitban_progress">',
+      '<div class="gitban_milestone">',
+        '<h4 class="gitban_milestone_name">Team Progress</h4>',
+      '</div>',
+    '</div>'
+  ].join(''));
+
   var $loader = $([
     '<div class="context-loader large-format-loader is-context-loading">',
       '<p><img height="64" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-128.gif" /></p>',
@@ -50,7 +58,7 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
   $boardButton.insertAfter( $firstButton );
 
   // Insert empty kanban board
-  $board.append( $loader )
+  $board.append( $loader, $progress )
     .appendTo('.repo-container');
 
   /**
@@ -95,9 +103,9 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
         '<div class="gitban_issue_data">',
           '<img class="gitban_avatar" src="' + avatar + '" />',
           '<h4>' + issue.title + '</h4>',
-          '<h6>#' + issue.number + '</h6>',
+          '<h5>#' + issue.number + '</h5>',
+          '<div class="gitban_tags">' + labels + '</div>',
         '</div>',
-        '<div class="gitban_tags">' + labels + '</div>',
         '<span class="gitban_link"><a href="' + issue.html_url + '" target="_blank"></a></span>',
       '</div>'
     ].join(''));
@@ -141,7 +149,7 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
         icon: 'issue-opened'
       });
 
-      $openIssues.appendTo( $board );
+      $openIssues.insertBefore( $progress );
     } else {
       emptyKanbanCol( $openIssues );
     }
@@ -153,7 +161,7 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
         icon: 'flame'
       });
 
-      $inProgressIssues.appendTo( $board );
+      $inProgressIssues.insertBefore( $progress );
     } else {
       emptyKanbanCol( $inProgressIssues );
     }
@@ -165,7 +173,7 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
         icon: 'issue-closed'
       });
 
-      $closedIssues.appendTo( $board );
+      $closedIssues.insertBefore( $progress );
     } else {
       emptyKanbanCol( $closedIssues );
     }
@@ -212,11 +220,12 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
      * Once we have our milestone load our issues.
      */
     function getIssues() {
-      var closeMessageRegex   = /((?:[Cc]los(?:e[sd]?|ing)|[Ff]ix(?:e[sd]|ing)?|[Rr]esolv(?:e[sd]?|ing)) +(?:(?:issues? +)?#\d+(?:(?:, *| +and +)?))+)/g;
+      var closeMessageRegex = /((?:[Cc]los(?:e[sd]?|ing)|[Ff]ix(?:e[sd]|ing)?|[Rr]esolv(?:e[sd]?|ing)) +(?:(?:issues? +)?#\d+(?:(?:, *| +and +)?))+)/g;
 
       var opts      = { user: config.username, repo: config.repo, milestone: milestone.number, state: 'all' };
       var issues    = github.getIssues(config.username, config.repo);
       var colCount  = [0,0,0];
+      var users     = [];
 
       // Sort issues into kanban columns
       issues.list(opts, function(err, issues) {
@@ -226,11 +235,28 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
 
         issues.forEach(function(issue) {
           var $i = $issueMarkup( issue );
+          var $userProgress = $();
+
+          if( !!issue.assignee && users.indexOf(issue.assignee.id) === -1 ) {
+            users.push(issue.assignee.id);
+
+            $userProgress = $issuesColMarkup({
+              className: 'progress',
+              stage: issue.assignee.login,
+              icon: 'pulse'
+            });
+
+            $userProgress.attr('user-id', issue.assignee.id);
+            $progress.append( $userProgress );
+          } else if( !!issue.assignee ) {
+            $userProgress = $('[user-id="' + issue.assignee.id + '"]');
+          }
 
           // The issue is closed
           if( issue.state === 'closed' ) {
-            $closedIssues.find('.gitban_issues_container').append( $i );
-            colCount[3]++;
+            $userProgress.find('.gitban_issues_container').append( $i.clone() );
+            $closedIssues.find('.gitban_issues_container').append( $i.clone() );
+            colCount[2]++;
 
           // TODO: Don't hardcode "in progress" ?
           } else if( issue.labels.map(function(l) { return l.name; }).indexOf('in progress') !== -1 ) {

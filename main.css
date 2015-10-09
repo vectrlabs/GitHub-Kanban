@@ -3,13 +3,9 @@
 /* -------------------------------------------------- */
 
 .gitban_board {
-  position: absolute;
-  left: 0;
-  right: 38px;
-  top: 0;
-  height: 850px;
   display: none;
   padding: 5px 10px;
+  overflow: hidden;
 }
 
 .gitban_milestone {
@@ -48,7 +44,6 @@
 
 .show_gitban .repo-container {
   position: relative;
-  height: 850px;
 }
 
 .site > .container.show_gitban .repository_content {
@@ -82,6 +77,13 @@
   max-height: 100%;
   overflow: scroll;
   float: left;
+  border-bottom: #E5E5E5;
+}
+.gitban_issues.gitban_issues_progress {
+  max-height: 9999em;
+}
+.gitban_issues.gitban_issues_progress .gitban_count {
+  display: none;
 }
 
 .gitban_issues .table-list-header {
@@ -107,8 +109,9 @@
   margin-right: 10px;
 }
 
-/* Open Issues */
-.gitban_issues_open .octicon {
+/* Open Issues / User Progress */
+.gitban_issues_open .octicon,
+.gitban_issues_progress .octicon {
   color: #77C95B;
 }
 
@@ -131,11 +134,10 @@
   width: 100%;
   border: 1px solid #E5E5E5;
   min-height: 200px;
-  max-height: 700px;
+  max-height: 430px;
   overflow-x: hidden;
   overflow-y: scroll;
   border-radius: 0 0 3px 3px;
-  padding: 10px;
 }
 
 /* -------------------------------------------------- */
@@ -145,40 +147,46 @@
 .gitban_issue {
   position: relative;
   width: 100%;
-  border: 1px solid #E5E5E5;
-  border-bottom-width: 2px;
-  border-radius: 3px;
-  margin-bottom: 15px;
+  border-bottom: 1px solid #E5E5E5;
+}
+.gitban_issue:last-child {
+  border-bottom: none;
 }
 .gitban_issue_data {
   position: relative;
-  padding: 0 15px 0 55px;
+  padding: 0 15px 0 60px;
+  overflow: hidden;
+  height: 55px;
 }
 .gitban_issue_data h4 {
-  margin-top: 10px;
-  margin-bottom: 5px;
+  margin: 12px 0 5px;
+  white-space: nowrap;
 }
-.gitban_issue_data h6 {
+.gitban_issue_data h5 {
   color: #4078C0;
   margin-top: 0;
+  float: left;
+  margin-right: 5px;
 }
 .gitban_avatar {
-  width: 35px;
-  height: 35px;
+  width: 40px;
+  height: 40px;
   position: absolute;
   left: 10px;
   top: 0;
-  border: 1px solid #ccc;
+  bottom: 0;
+  margin: auto;
   background-image: url('data:image/png;base64,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');
   background-size: cover;
 }
 .gitban_tags {
-  border-top: 1px solid #E5E5E5;
-  padding: 10px;
-  background: #F8F8F8;
+  float: left;
+  margin: -4px 0 0 0;
 }
 .gitban_tags .label {
   text-shadow: 0 1px 1px rgba(0,0,0,.25);
+  font-size: 10px;
+  padding: 2px 4px 3px 4px;
 }
 .gitban_issue span.gitban_link {
   display: block;
@@ -192,4 +200,31 @@
   width: 100%;
   height: 100%;
   display: block;
+}
+
+/* -------------------------------------------------- */
+/* [ PROGRESS + SLIDER ] */
+/* -------------------------------------------------- */
+
+.gitban_progress {
+  width: 100%;
+  clear: both;
+  float: left;
+  margin-top: 45px;
+}
+.gitban_issues_progress {
+  max-height: 255px;
+}
+.gitban_issues_progress .table-list-header h5 {
+  margin: 8px 0;
+}
+.gitban_issues_progress .gitban_issues_container {
+  min-height: 50px;
+  max-height: 210px;
+}
+.gitban_issues_progress .gitban_issue_data {
+  padding: 0 15px 0 15px;
+}
+.gitban_issues_progress .gitban_issue_data .gitban_avatar {
+  display: none;
 }
