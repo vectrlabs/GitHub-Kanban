@@ -12,6 +12,17 @@ A Chrome extension which injects a fully automated Kanban board into GitHub, hac
 
 # Installation
 
+## From Chrome web store
+
+it's recommended to install via chrome web store since it can be automated update.
+
+* Go to [Chrome web store](https://chrome.google.com/webstore/) and login with your @vectr.com account.
+* Go to [this page](https://chrome.google.com/webstore/detail/github-kanban/mmdoepbmcmdbfobcabocpeocoldfdkph) and install it
+* if the link does not work, add `?authuser=1` to the [link](https://chrome.google.com/webstore/detail/github-kanban/mmdoepbmcmdbfobcabocpeocoldfdkph?authuser=1)
+
+
+## Manual
+
 * `git clone` the repo
 * Go to [chrome://extensions/](chrome://extensions/) to manage your extensions
 * Check the `developer mode` box at the top of this page
