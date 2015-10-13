@@ -18,7 +18,7 @@ it's recommended to install via chrome web store since it can be automated updat
 
 * Go to [Chrome web store](https://chrome.google.com/webstore/) and login with your @vectr.com account.
 * Go to [this page](https://chrome.google.com/webstore/detail/github-kanban/mmdoepbmcmdbfobcabocpeocoldfdkph) and install it
-* if the link does not work, add `?authuser=1` to the [link](https://chrome.google.com/webstore/detail/github-kanban/mmdoepbmcmdbfobcabocpeocoldfdkph?authuser=1)
+* if you have multiple google accounts, add `?authuser=x` (`x=[1,2,3...]`) to the [extension link](https://chrome.google.com/webstore/detail/github-kanban/mmdoepbmcmdbfobcabocpeocoldfdkph?authuser=1)
 
 
 ## Manual
