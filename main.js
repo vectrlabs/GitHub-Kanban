@@ -217,6 +217,31 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
       getIssues();
     });
 
+    function getIssueEstimation(issue) {
+      var estimation;
+      var label = issue.labels.filter(function(label) {
+        return label.name.indexOf('estimate') !== -1;
+      })[0];
+
+      if (!label) {
+        estimation = 0;
+      }
+      else if (label.name.indexOf('estimate: more than 1 week') !== -1) {
+        estimation = 10;
+      }
+      else if (label.name.indexOf('estimate: 1 week') !== -1) {
+        estimation = 5;
+      }
+      else if (label.name.indexOf('estimate: 1 day') !== -1) {
+        estimation = 1;
+      }
+      else {
+        estimation = 0;
+      }
+
+      return estimation;
+    }
+
     /**
      * Once we have our milestone load our issues.
      */
@@ -233,6 +258,10 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
         if( err ) {
           return;
         }
+
+        issues.sort(function(a, b) {
+          return getIssueEstimation(b) - getIssueEstimation(a);
+        });
 
         issues.forEach(function(issue) {
           var $i = $issueMarkup( issue );

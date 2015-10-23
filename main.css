@@ -156,7 +156,6 @@
   position: relative;
   padding: 0 15px 0 60px;
   overflow: hidden;
-  height: 55px;
 }
 .gitban_issue_data h4 {
   margin: 12px 0 5px;
@@ -180,7 +179,6 @@
   background-size: cover;
 }
 .gitban_tags {
-  float: left;
   margin: -4px 0 0 0;
 }
 .gitban_tags .label {
