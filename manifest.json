@@ -1,6 +1,6 @@
 {
   "name": "GitHub Kanban",
-  "version": "0.3",
+  "version": "0.3.1",
   "description": "Kanban Board for GitHub",
   "manifest_version": 2,
   "icons" : {

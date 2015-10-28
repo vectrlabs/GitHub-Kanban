@@ -324,7 +324,7 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
       var startDate = new Date(previousMilestone.due_on);
       var now = new Date();
       var diffDays = Math.ceil(Math.abs(startDate.getTime() - endDate.getTime()) / (1000 * 3600 * 24));
-      var diffDaysUntilNow = Math.ceil(Math.abs(startDate.getTime() - now.getTime()) / (1000 * 3600 * 24));
+      var diffDaysUntilNow = Math.ceil(Math.abs(startDate.getTime() - now.getTime()) / (1000 * 3600 * 24)) + 1;
       var days = new Array(diffDays);
       var estimation = new Array(days.length);
       var untilNow = new Array(diffDaysUntilNow);
