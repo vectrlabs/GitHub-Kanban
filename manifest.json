@@ -1,6 +1,6 @@
 {
   "name": "GitHub Kanban",
-  "version": "0.2",
+  "version": "0.3",
   "description": "Kanban Board for GitHub",
   "manifest_version": 2,
   "icons" : {
@@ -19,7 +19,9 @@
     }
   ],
   "web_accessible_resources": [
-    "github/github.js",
+    "vendor/github.js",
+    "vendor/chartist.min.js",
+    "vendor/chartist.min.css",
     "main.js",
     "main.css"
   ]

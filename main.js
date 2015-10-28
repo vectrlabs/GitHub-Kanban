@@ -25,6 +25,8 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
       '<div class="gitban_milestone">',
         '<h4 class="gitban_milestone_name">Team Progress</h4>',
       '</div>',
+      '<div class="burndown-desc"><strong>more than one week:</strong> 10 points, <strong>one week:</strong> 5 points, <strong>one day and no estimation:</strong> 1 point</div>',
+      '<div class="ct-chart"></div>',
     '</div>'
   ].join(''));
 
@@ -186,17 +188,20 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
 
     var repo = github.getRepo(config.username, config.repo);
     var milestone;
+    var previousMilestone;
+    var issues;
 
-    repo.listMilestones(function(err, milestones) {
+    repo.listMilestones({state: 'all'}, function(err, milestones) {
       if( err ) {
         return;
       }
 
-      milestones.forEach(function(ms) {
-        if( !milestone || new Date(ms.due_on) < new Date(milestone.due_on) ) {
-          milestone = ms;
-        }
+      milestones.sort(function(a, b) {
+        return new Date(a.due_on) > new Date(b.due_on);
       });
+
+      milestone = milestones.pop();
+      previousMilestone = milestones.pop();
 
       // Set the title
       $milestone.find('.gitban_milestone_name a')
@@ -236,7 +241,7 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
         estimation = 1;
       }
       else {
-        estimation = 0;
+        estimation = 1;
       }
 
       return estimation;
@@ -249,16 +254,17 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
       var closeMessageRegex = /((?:[Cc]los(?:e[sd]?|ing)|[Ff]ix(?:e[sd]|ing)?|[Rr]esolv(?:e[sd]?|ing)) +(?:(?:issues? +)?#\d+(?:(?:, *| +and +)?))+)/g;
 
       var opts      = { user: config.username, repo: config.repo, milestone: milestone.number, state: 'all' };
-      var issues    = github.getIssues(config.username, config.repo);
+      var issuesObj    = github.getIssues(config.username, config.repo);
       var colCount  = [0,0,0];
       var users     = [];
 
       // Sort issues into kanban columns
-      issues.list(opts, function(err, issues) {
+      issuesObj.list(opts, function(err, data) {
         if( err ) {
           return;
         }
 
+        issues = data;
         issues.sort(function(a, b) {
           return getIssueEstimation(b) - getIssueEstimation(a);
         });
@@ -266,6 +272,7 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
         issues.forEach(function(issue) {
           var $i = $issueMarkup( issue );
           var $userProgress = $();
+          issue.estimation = getIssueEstimation(issue);
 
           if( !!issue.assignee && users.indexOf(issue.assignee.id) === -1 ) {
             users.push(issue.assignee.id);
@@ -300,6 +307,8 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
           }
         });
 
+        generateBurndown();
+
         // Set 'total's for each column
         var $count = $('.gitban_count');
         colCount.forEach(function(num, i) {
@@ -308,6 +317,65 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
 
         $loader.hide();
       });
+    }
+
+    function generateBurndown() {
+      var endDate = new Date(milestone.due_on);
+      var startDate = new Date(previousMilestone.due_on);
+      var now = new Date();
+      var diffDays = Math.ceil(Math.abs(startDate.getTime() - endDate.getTime()) / (1000 * 3600 * 24));
+      var diffDaysUntilNow = Math.ceil(Math.abs(startDate.getTime() - now.getTime()) / (1000 * 3600 * 24));
+      var days = new Array(diffDays);
+      var estimation = new Array(days.length);
+      var untilNow = new Array(diffDaysUntilNow);
+      var cursor = startDate;
+
+      days.fill('day ');
+      days = days.map(function(d, i) {
+        return d + (i+1);
+      });
+
+      var allPoints = 0;
+
+      issues.forEach(function(issue) {
+        allPoints += issue.estimation;
+      });
+      untilNow.fill(allPoints);
+
+      issues.forEach(function(issue) {
+        if (issue.state === 'closed') {
+          var closedDate = new Date(issue.closed_at);
+          var offset = Math.ceil(Math.abs(startDate.getTime() - closedDate.getTime()) / (1000 * 3600 * 24));
+          untilNow[offset] -= issue.estimation;
+        }
+      })
+
+      estimation.fill(0);
+      estimation = estimation.map(function(d, i) {
+        return allPoints / days.length * (days.length - i);
+      });
+
+
+      var data = {
+        // A labels array that can contain any sort of values
+        labels: days,
+        // Our series array that contains series objects or in this case series data arrays
+        series: [
+          estimation, untilNow
+        ]
+      };
+
+      var options = {
+        height: 400,
+        axisX: {
+          showLabel: true
+        }
+      };
+
+      // Create a new line chart object where as first parameter we pass in a selector
+      // that is resolving to our chart container element. The Second parameter
+      // is the actual data object.
+      new Chartist.Line('.ct-chart', data, options);
     }
 
   }

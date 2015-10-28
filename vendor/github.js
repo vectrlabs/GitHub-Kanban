@@ -319,8 +319,8 @@
       // List all milestones of a repository
       // -------
 
-      this.listMilestones = function(cb) {
-        _request('GET', repoPath + '/milestones', null, function(err, milestones) {
+      this.listMilestones = function(options, cb) {
+        _request('GET', repoPath + '/milestones', options, function(err, milestones) {
           if (err) {
             return cb(err);
           }

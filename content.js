@@ -12,21 +12,19 @@ chrome.storage.local.get('options', function(items) {
     injectedCodes.textContent = injectedVars;
     (document.head || document.documentElement).appendChild(injectedCodes);
 
-    // GitHub API (Ironic...)
-    var gitbanGitHub = document.createElement('script');
-    gitbanGitHub.src = chrome.extension.getURL('github/github.js');
-    (document.head || document.documentElement).appendChild(gitbanGitHub);
 
-    // Script
-    var script = document.createElement('script');
-    script.src = chrome.extension.getURL('main.js');
-    (document.head || document.documentElement).appendChild(script);
+    ['vendor/github.js', 'vendor/chartist.min.js', 'main.js'].forEach(function(script) {
+        var scriptElement = document.createElement('script');
+        scriptElement.src = chrome.extension.getURL(script);
+        (document.head || document.documentElement).appendChild(scriptElement);
+    });
 
-    // Stylesheet
-    var style = document.createElement('link');
-    style.rel   = 'stylesheet';
-    style.type  = 'text/css';
-    style.href  = chrome.extension.getURL('main.css');
-
-    (document.head || document.documentElement).appendChild(style);
+    ['vendor/chartist.min.css', 'main.css'].forEach(function(css) {
+        // Stylesheet
+        var style = document.createElement('link');
+        style.rel   = 'stylesheet';
+        style.type  = 'text/css';
+        style.href  = chrome.extension.getURL(css);
+        (document.head || document.documentElement).appendChild(style);
+    });
 });

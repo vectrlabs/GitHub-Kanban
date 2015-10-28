@@ -226,3 +226,7 @@
 .gitban_issues_progress .gitban_issue_data .gitban_avatar {
   display: none;
 }
+
+.burndown-desc {
+  margin: 15px;
+}
