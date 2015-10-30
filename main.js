@@ -346,7 +346,11 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
         if (issue.state === 'closed') {
           var closedDate = new Date(issue.closed_at);
           var offset = Math.ceil(Math.abs(startDate.getTime() - closedDate.getTime()) / (1000 * 3600 * 24));
-          untilNow[offset] -= issue.estimation;
+          untilNow.forEach(function(estimation, i) {
+            if (i >= offset) {
+              untilNow[i] -= issue.estimation;
+            }
+          })
         }
       })
 
