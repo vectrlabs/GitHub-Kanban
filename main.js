@@ -211,9 +211,27 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
       var dayDiff   = Math.floor( (new Date( milestone.due_on ) - new Date()) / 86400000 );
       var timeLeft  = ( dayDiff <= 7 ) ? dayDiff + ' days' : Math.floor(dayDiff / 7) + ' weeks';
 
+      var desktopReleaseTimeBase = moment('2015-10-20');
+      var nextDesktopReleaseDate = desktopReleaseTimeBase.add(4, 'weeks');
+
+      var websiteReleaseTimeBase = moment('2015-11-03');
+      var nextWebsiteReleaseDate = websiteReleaseTimeBase.add(2, 'weeks');
+
+      var desktopReleaseHTML =
+        'Next Desktop : ' +
+        nextDesktopReleaseDate.format('YYYY-MM-DD');
+
+      var websiteReleaseHTML =
+        'Next Website : ' +
+        nextWebsiteReleaseDate.format('YYYY-MM-DD');
+
+      var dueHTML =
+        '<span class="octicon octicon-calendar"></span>' +
+        ' Due in ' + timeLeft;
+
       // Set the open / closed
       $milestone.find('.milestone-meta-item')
-        .html( '<span class="octicon octicon-calendar"></span>' + ' Due in ' + timeLeft )
+        .html(desktopReleaseHTML + ' , ' + websiteReleaseHTML + ' , ' + dueHTML);
 
       // Set open/closed issues
       $milestone.find('.gitban_milestone_description p')
@@ -381,7 +399,6 @@ if((config.username && config.repo) && window.location.pathname.indexOf( config.
       // is the actual data object.
       new Chartist.Line('.ct-chart', data, options);
     }
-
   }
 
   // Previously opened button

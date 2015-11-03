@@ -20,6 +20,7 @@
   ],
   "web_accessible_resources": [
     "vendor/github.js",
+    "vendor/moment.min.js",
     "vendor/chartist.min.js",
     "vendor/chartist.min.css",
     "main.js",

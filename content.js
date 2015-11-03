@@ -13,7 +13,12 @@ chrome.storage.local.get('options', function(items) {
     (document.head || document.documentElement).appendChild(injectedCodes);
 
 
-    ['vendor/github.js', 'vendor/chartist.min.js', 'main.js'].forEach(function(script) {
+    [
+      'vendor/github.js',
+      'vendor/moment.min.js',
+      'vendor/chartist.min.js',
+      'main.js'
+    ].forEach(function(script) {
         var scriptElement = document.createElement('script');
         scriptElement.src = chrome.extension.getURL(script);
         (document.head || document.documentElement).appendChild(scriptElement);
