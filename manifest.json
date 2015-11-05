@@ -15,15 +15,19 @@
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],
-      "js": ["content.js"]
+      "js": [
+        "vendor/jquery-1.11.3.min.js",
+        "vendor/github.js",
+        "vendor/moment.min.js",
+        "vendor/moment-recur.min.js",
+        "vendor/chartist.min.js",
+        "main.js"
+      ],
+      "css": [
+        "vendor/chartist.min.css",
+        "main.css"
+      ],
+      "run_at": "document_idle"
     }
-  ],
-  "web_accessible_resources": [
-    "vendor/github.js",
-    "vendor/moment.min.js",
-    "vendor/chartist.min.js",
-    "vendor/chartist.min.css",
-    "main.js",
-    "main.css"
   ]
 }
