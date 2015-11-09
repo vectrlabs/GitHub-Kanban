@@ -25,7 +25,6 @@ chrome.storage.local.get('options', function(items) {
         '<div class="gitban_milestone">',
           '<h4 class="gitban_milestone_name">Team Progress</h4>',
         '</div>',
-        '<div class="burndown-desc"><strong>more than one week:</strong> 10 points, <strong>one week:</strong> 5 points, <strong>one day and no estimation:</strong> 1 point</div>',
         '<div class="ct-chart"></div>',
       '</div>'
     ].join(''));
@@ -200,8 +199,15 @@ chrome.storage.local.get('options', function(items) {
           return new Date(a.due_on) > new Date(b.due_on);
         });
 
-        milestone = milestones.pop();
-        previousMilestone = milestones.pop();
+        var today = new Date();
+        while(true) {
+          milestone = milestones.pop();
+          previousMilestone = milestones[milestones.length-1];
+
+          if (!milestone || new Date(previousMilestone.due_on) < today) {
+            break;
+          }
+        }
 
         // Set the title
         $milestone.find('.gitban_milestone_name a')
@@ -246,29 +252,16 @@ chrome.storage.local.get('options', function(items) {
         getIssues();
       });
 
-      function getIssueEstimation(issue) {
-        var estimation;
-        var label = issue.labels.filter(function(label) {
-          return label.name.indexOf('estimate') !== -1;
-        })[0];
-
-        if (!label) {
-          estimation = 0;
-        }
-        else if (label.name.indexOf('estimate: more than 1 week') !== -1) {
-          estimation = 10;
-        }
-        else if (label.name.indexOf('estimate: 1 week') !== -1) {
-          estimation = 5;
-        }
-        else if (label.name.indexOf('estimate: 1 day') !== -1) {
-          estimation = 1;
-        }
-        else {
-          estimation = 1;
-        }
-
-        return estimation;
+      function getStoryPoints(issue) {
+        var points = 0;
+        var pointsPattern = /(\d{1,2})pts?/;
+        issue.labels.forEach(function(label) {
+          var matched = pointsPattern.exec(label.name);
+          if (matched) {
+            points = Number.parseInt(matched[1]);
+          }
+        });
+        return points;
       }
 
       /**
@@ -290,13 +283,13 @@ chrome.storage.local.get('options', function(items) {
 
           issues = data;
           issues.sort(function(a, b) {
-            return getIssueEstimation(b) - getIssueEstimation(a);
+            return getStoryPoints(b) - getStoryPoints(a);
           });
 
           issues.forEach(function(issue) {
             var $i = $issueMarkup( issue );
             var $userProgress = $();
-            issue.estimation = getIssueEstimation(issue);
+            issue.points = getStoryPoints(issue);
 
             if( !!issue.assignee && users.indexOf(issue.assignee.id) === -1 ) {
               users.push(issue.assignee.id);
@@ -350,7 +343,7 @@ chrome.storage.local.get('options', function(items) {
         var diffDays = Math.ceil(Math.abs(startDate.getTime() - endDate.getTime()) / (1000 * 3600 * 24));
         var diffDaysUntilNow = Math.ceil(Math.abs(startDate.getTime() - now.getTime()) / (1000 * 3600 * 24)) + 1;
         var days = new Array(diffDays);
-        var estimation = new Array(days.length);
+        var points = new Array(days.length);
         var untilNow = new Array(diffDaysUntilNow);
         var cursor = startDate;
 
@@ -362,7 +355,7 @@ chrome.storage.local.get('options', function(items) {
         var allPoints = 0;
 
         issues.forEach(function(issue) {
-          allPoints += issue.estimation;
+          allPoints += issue.points;
         });
         untilNow.fill(allPoints);
 
@@ -370,16 +363,16 @@ chrome.storage.local.get('options', function(items) {
           if (issue.state === 'closed') {
             var closedDate = new Date(issue.closed_at);
             var offset = Math.ceil(Math.abs(startDate.getTime() - closedDate.getTime()) / (1000 * 3600 * 24));
-            untilNow.forEach(function(estimation, i) {
+            untilNow.forEach(function(points, i) {
               if (i >= offset) {
-                untilNow[i] -= issue.estimation;
+                untilNow[i] -= issue.points;
               }
             })
           }
         })
 
-        estimation.fill(0);
-        estimation = estimation.map(function(d, i) {
+        points.fill(0);
+        points = points.map(function(d, i) {
           return allPoints / days.length * (days.length - i);
         });
 
@@ -389,7 +382,7 @@ chrome.storage.local.get('options', function(items) {
           labels: days,
           // Our series array that contains series objects or in this case series data arrays
           series: [
-            estimation, untilNow
+            points, untilNow
           ]
         };
 
