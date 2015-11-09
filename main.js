@@ -214,8 +214,8 @@ chrome.storage.local.get('options', function(items) {
         var now = moment();
         var dateFormat = 'YYYY-MM-DD';
 
-        var desktopReleaseTimeBase = moment('2015-10-20');
-        var websiteReleaseTimeBase = moment('2015-11-03');
+        var desktopReleaseTimeBase = moment('2015-12-01');
+        var websiteReleaseTimeBase = moment('2015-11-10');
 
         var desktopRecurr = desktopReleaseTimeBase.recur().every(4).weeks();
         desktopRecurr.fromDate(now);
