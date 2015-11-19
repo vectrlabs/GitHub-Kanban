@@ -4,12 +4,12 @@ chrome.storage.local.get('options', function(items) {
   // Only run if we are in the right :username:/:repo:
   if ((config.username && config.repo) && window.location.pathname.indexOf( config.username + '/' + config.repo ) !== -1 ) {
 
-    var $firstButton = $('.repository-sidebar .sunken-menu-group li:first');
-    var $boardButton = $firstButton.clone();
+    var $firstButton = $('.reponav a:first');
     var $openIssues  = $();
     var $inProgressIssues = $();
     var $closedIssues     = $();
     var $board = $('<div class="gitban_board gitban_board_loading" />');
+    var $boardButton = $();
 
     var $milestone = $([
       '<div class="gitban_milestone">',
@@ -17,6 +17,7 @@ chrome.storage.local.get('options', function(items) {
         '<h5 class="milestone-meta">',
           '<span class="milestone-meta-item"></span>',
         '</h5>',
+        '<span class="milestone-meta-release"></span>',
       '</div>'
     ].join(''));
 
@@ -39,28 +40,46 @@ chrome.storage.local.get('options', function(items) {
     // Append the milestone
     $milestone.prependTo( $board );
 
-    // Label the button
-    $boardButton.addClass('gitban_button')
-      .attr('aria-label', 'Kanban');
-
-    // Replace Icon
-    $boardButton.find('.octicon')
-      .addClass('octicon octicon-three-bars')
-
-    // Text Label
-    $boardButton.find('.full-word')
-      .text('Kanban');
-
-    // Deselect the clone
-    $boardButton.find('a')
-      .removeClass('js-selected-navigation-item selected');
-
-    // Insert Button
-    $boardButton.insertAfter( $firstButton );
+    // Remove the first class
+    $firstButton.removeClass('js-selected-navigation-item selected');
 
     // Insert empty kanban board
     $board.append( $loader, $progress )
-      .appendTo('.repo-container');
+      .appendTo('.container.repo-container');
+
+    // GitHub removes the nav elements on every load, so we
+    // have to check in a stupid way whether the button is still
+    // there and reload it if it's not
+    $(document.body).on('click', '.reponav a', function() {
+      var i = 0;
+      var addButtonInterval = setInterval(function() {
+
+        // Load button and stop checking
+        if( $('.gitban_button').length <= 0 ) {
+          window.clearInterval(addButtonInterval);
+          loadButton();
+
+        // Give up
+        } else if( i > 100 ) {
+          window.clearInterval(addButtonInterval);
+        }
+
+        i++;
+
+      }, 500);
+    });
+
+    // Insert Kanban Button
+    function loadButton() {
+      $boardButton = $firstButton.clone();
+
+      $boardButton.prependTo( $('.reponav') )
+        $boardButton.addClass('gitban_button')
+        .attr('aria-label', 'Kanban')
+        .html('<span class="octicon octicon-three-bars"></span> Kanban');
+    }
+
+    loadButton();
 
     /**
      * Markup for issue columns. Icons are octicons.
@@ -214,8 +233,15 @@ chrome.storage.local.get('options', function(items) {
           .text( 'Working On: ' + milestone.title );
 
         // Get time left
-        var dayDiff   = Math.floor( (new Date( milestone.due_on ) - new Date()) / 86400000 );
-        var timeLeft  = ( dayDiff <= 7 ) ? dayDiff + ' days' : Math.floor(dayDiff / 7) + ' weeks';
+        // var dayDiff   = Math.floor( (new Date( milestone.due_on ) - new Date()) / 86400000 );
+        // var timeLeft  = ( dayDiff <= 7 ) ? dayDiff + ' days' : Math.floor(dayDiff / 7) + ' weeks';
+
+        function toHumanReadable( date ) {
+          var dayDiff   = Math.floor( (new Date( date ) - new Date()) / 86400000 );
+          var timeLeft  = ( dayDiff <= 7 ) ? dayDiff + ' days' : Math.floor(dayDiff / 7) + ' weeks';
+
+          return timeLeft;
+        }
 
         var now = moment();
         var dateFormat = 'YYYY-MM-DD';
@@ -231,19 +257,16 @@ chrome.storage.local.get('options', function(items) {
         websiteRecurr.fromDate(now);
         var nextWebsiteReleaseDate = websiteRecurr.next(1, dateFormat);
 
-        var desktopReleaseHTML =
-          'Next Desktop : ' + nextDesktopReleaseDate;
-
-        var websiteReleaseHTML =
-          'Next Website : ' + nextWebsiteReleaseDate;
-
         var dueHTML =
           '<span class="octicon octicon-calendar"></span>' +
-          ' Due in ' + timeLeft;
+          ' Due in ' + toHumanReadable( milestone.due_on );
+
+        $milestone.find('.milestone-meta-item').html( dueHTML );
 
         // Set the open / closed
-        $milestone.find('.milestone-meta-item')
-          .html(desktopReleaseHTML + ' , ' + websiteReleaseHTML + ' , ' + dueHTML);
+        $('.milestone-meta-release')
+          // .html(desktopReleaseHTML + ' - ' + websiteReleaseHTML);
+          .html('Next Desktop: <strong>' + toHumanReadable( nextDesktopReleaseDate ) + '</strong> - Next Web Release: <strong>' + toHumanReadable( nextWebsiteReleaseDate ) + '</strong>');
 
         // Set open/closed issues
         $milestone.find('.gitban_milestone_description p')
@@ -408,24 +431,11 @@ chrome.storage.local.get('options', function(items) {
      *
      * @param  {object} e  $.Event
      */
-    $boardButton.on('click', function openBoard(e) {
-      e.preventDefault();
-      e.stopPropagation();
-
+    function openBoard(e) {
       var $container = $('.repo-container').closest('.container');
 
-      // Close the container....
-      if( $container.hasClass('show_gitban') ) {
-        $prevButton.find('a').addClass('selected');
-        closeGitban();
-        return;
-      }
-
+      $boardButton.addClass('selected');
       $container.addClass('show_gitban');
-      $prevButton = $('.repository-sidebar li a.selected').parent();
-
-      $prevButton.find('a').removeClass('selected');
-      $(this).find('a').addClass('selected');
 
       loadGitHubIssues();
 
@@ -434,7 +444,21 @@ chrome.storage.local.get('options', function(items) {
       $('.repository-content').hide();
 
       $board.show();
+    }
+
+    $('body').on('click', '.gitban_button', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Redirecting (rather than reloading) helps avoid annoying GitHub behaviour which can
+      // break kanban anytime github makes a minor change to their markup.
+      window.location.href = 'https://github.com/' + config.username + '/' + config.repo;
     });
+
+    // Open the board if we're at the right url
+    if( window.location.pathname === '/' + config.username + '/' + config.repo ) {
+      openBoard();
+    }
 
   }
 });

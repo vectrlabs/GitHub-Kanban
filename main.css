@@ -8,13 +8,25 @@
   overflow: hidden;
 }
 
+.reponav {
+  padding-left: 92px;
+}
+
+.gitban_button {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 .gitban_milestone {
   margin: 0 .5%;
   border: 1px solid #E5E5E5;
   border-radius: 3px;
   overflow: hidden;
   padding: 0 15px;
+  position: relative;
 }
+
 .gitban_milestone_name {
   float: left;
 }
@@ -22,6 +34,15 @@
   float: right;
   color: #9C9C9C;
   font-weight: bold;
+  margin: 10px 0 0;
+}
+
+.milestone-meta-release {
+  position: absolute;
+  bottom: 5px;
+  right: 25px;
+  font-size: 10px;
+  color: #9C9C9C;
 }
 
 .gitban_milestone_description {
@@ -30,6 +51,7 @@
 
 .gitban_board .context-loader  {
   position: absolute;
+  margin-top: 150px !important;
 }
 
 .site > .container.show_gitban {
