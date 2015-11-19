@@ -4,6 +4,8 @@ chrome.storage.local.get('options', function(items) {
   // Only run if we are in the right :username:/:repo:
   if ((config.username && config.repo) && window.location.pathname.indexOf( config.username + '/' + config.repo ) !== -1 ) {
 
+    $('body').addClass('gitban_repo');
+
     var $firstButton = $('.reponav a:first');
     var $openIssues  = $();
     var $inProgressIssues = $();
