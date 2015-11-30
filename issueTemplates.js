@@ -16,6 +16,8 @@ var issueTemplates = {
     '\n...',
     '\n\n#### Design Reference / Mockup / Sketches (optional)',
     '\n...',
+    '\n\n#### Error Handling',
+    '\n...',
     '\n\n#### Notes (optional)',
     '\n...',
     '\n\n#### References (optional)',
