@@ -10,6 +10,12 @@ A Chrome extension which injects a fully automated Kanban board into GitHub, hac
 * Always [close issues with a commit message](https://help.github.com/articles/closing-issues-via-commit-messages/) (fix #123, etc...). These messages are used to move issues to the Testing / Code Review column.
 * That's it - everything else will happen automatically.
 
+# GitHub Issue Templates
+
+We've included some templates for GitHub issues. These templates help us clearly and consistently explain our GitHub issues. As a remote team, this type of communication can be more difficult that other teams, but we've found that these templates work very well for us. *Please use these templates _every_ time you create a GitHub issue ;)*.
+
+![](https://cldup.com/XLkwaMCtJp-3000x3000.png)
+
 # Installation
 
 ## From Chrome web store
