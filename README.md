@@ -14,7 +14,7 @@ A Chrome extension which injects a fully automated Kanban board into GitHub, hac
 
 We've included some templates for GitHub issues. These templates help us clearly and consistently explain our GitHub issues. As a remote team, this type of communication can be more difficult that other teams, but we've found that these templates work very well for us. *Please use these templates _every_ time you create a GitHub issue ;)*.
 
-![](https://cldup.com/XLkwaMCtJp-3000x3000.png)
+![](https://cldup.com/MraxGFPhPj-1200x1200.png)
 
 # Installation
 
