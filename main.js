@@ -47,7 +47,7 @@ chrome.storage.local.get('options', function(items) {
 
     // Insert empty kanban board
     $board.append( $loader, $progress )
-      .appendTo('.container.repo-container');
+      .appendTo('#js-repo-pjax-container > .container');
 
     // GitHub removes the nav elements on every load, so we
     // have to check in a stupid way whether the button is still
@@ -137,7 +137,8 @@ chrome.storage.local.get('options', function(items) {
      * Close the Kanban board, restore normal github.
      */
     function closeGitban() {
-      var $container = $('.repo-container').closest('.container');
+      var $container = $('#js-repo-pjax-container > .container');
+      // var $container = $('.repo-container').closest('.container');
 
       $board.hide();
       $container.removeClass('show_gitban');
@@ -208,10 +209,9 @@ chrome.storage.local.get('options', function(items) {
 
       var repo = github.getRepo(config.username, config.repo);
       var milestone;
-      var previousMilestone;
       var issues;
 
-      repo.listMilestones({state: 'all'}, function(err, milestones) {
+      repo.listMilestones({state: 'open'}, function(err, milestones) {
         if( err ) {
           return;
         }
@@ -220,23 +220,11 @@ chrome.storage.local.get('options', function(items) {
           return new Date(a.due_on) > new Date(b.due_on);
         });
 
-        var today = new Date();
-        while(true) {
-          milestone = milestones.pop();
-          previousMilestone = milestones[milestones.length-1];
-
-          if (!milestone || new Date(previousMilestone.due_on) < today) {
-            break;
-          }
-        }
+        milestone = milestones[0];
 
         // Set the title
         $milestone.find('.gitban_milestone_name a')
           .text( 'Working On: ' + milestone.title );
-
-        // Get time left
-        // var dayDiff   = Math.floor( (new Date( milestone.due_on ) - new Date()) / 86400000 );
-        // var timeLeft  = ( dayDiff <= 7 ) ? dayDiff + ' days' : Math.floor(dayDiff / 7) + ' weeks';
 
         function toHumanReadable( date ) {
           var dayDiff   = Math.floor( (new Date( date ) - new Date()) / 86400000 );
@@ -363,7 +351,11 @@ chrome.storage.local.get('options', function(items) {
 
       function generateBurndown() {
         var endDate = new Date(milestone.due_on);
-        var startDate = new Date(previousMilestone.due_on);
+        var startDate = new Date(milestone.due_on);
+
+        // Back this up two weeks
+        startDate.setDate( endDate.getDate() - 14 );
+
         var now = new Date();
         var diffDays = Math.ceil(Math.abs(startDate.getTime() - endDate.getTime()) / (1000 * 3600 * 24));
         var diffDaysUntilNow = Math.ceil(Math.abs(startDate.getTime() - now.getTime()) / (1000 * 3600 * 24)) + 1;
@@ -434,7 +426,8 @@ chrome.storage.local.get('options', function(items) {
      * @param  {object} e  $.Event
      */
     function openBoard(e) {
-      var $container = $('.repo-container').closest('.container');
+      var $container = $('#js-repo-pjax-container > .container')
+      // var $container = $('.repo-container').closest('.container');
 
       $boardButton.addClass('selected');
       $container.addClass('show_gitban');
