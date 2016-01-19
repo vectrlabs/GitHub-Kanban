@@ -64,8 +64,10 @@
   padding: 0 5px !important;
 }
 
-.show_gitban .repo-container {
+/*.show_gitban #js-repo-pjax-container > .container {*/
+#js-repo-pjax-container .show_gitban {
   position: relative;
+  width: 100% !important;
 }
 
 .site > .container.show_gitban .repository_content {
