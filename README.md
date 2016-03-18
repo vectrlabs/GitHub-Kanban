@@ -1,3 +1,5 @@
+# No Longer Maintained. We're using ZenHub.
+
 # What
 
 A Chrome extension which injects a fully automated Kanban board into GitHub, hacked together very quickly.
